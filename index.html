@@ -422,13 +422,8 @@
       <div class="bio-deco" style="margin-top:28px;"></div>
     </div>
 
-    <!-- colonna destra: testo bio — MODIFICA QUI LA TUA BIO -->
-    <div class="bio-text">
-      <p>Sono Maurizio Figliomeni, artista digitale che lavora sotto il nome maffy953. La mia ricerca visiva si muove nel territorio dell'astrazione geometrica, dove forme essenziali e palette cromatiche audaci si incontrano per dare voce a temi emotivi profondi.</p>
-      <p>Ogni opera della mia serie "Connessioni" è un tentativo di tradurre in immagine ciò che le parole faticano a dire: frequenze, variazioni, silenzi e tensioni del vivere contemporaneo.</p>
-      <p>Gestisco in autonomia sia la dimensione creativa che quella tecnica del mio lavoro, dalla produzione delle opere fino alla costruzione del mio sito portfolio e alla presenza online. Le mie opere sono disponibili come NFT sulla piattaforma Rarible, con un modello che preserva i miei diritti d'autore e garantisce royalties su ogni rivendita.</p>
-      <p>Con una visione ibrida tra arte e tecnologia, sto costruendo una presenza digitale coerente e riconoscibile, rivolta tanto al collezionismo italiano quanto al mercato internazionale.</p>
-    </div>
+    <!-- colonna destra: testo bio — ora caricato da content/site.json, modificabile da /admin -->
+    <div class="bio-text" id="bioText"></div>
 
   </div>
 </div>
@@ -508,7 +503,7 @@
     <div class="footer-links">
       <a href="termini-condizioni-nft.html">Termini e Condizioni di Vendita NFT</a>
       <a href="policy-moderazione.html">Policy di Moderazione</a>
-      <a href="mailto:INSERISCI-EMAIL">Contatti</a>
+      <a href="mailto:INSERISCI-EMAIL" id="contactLink">Contatti</a>
     </div>
     <div class="footer-copy">
       © Maurizio Figliomeni (maffy953) — Tutte le opere sono originali digitali certificati.<br>
@@ -548,64 +543,39 @@
 <!-- ==================== SCRIPT ==================== -->
 <script>
 
-/* ---- IMMAGINE REALE MF-001 ----
-   ISTRUZIONE: incolla qui il tuo base64 originale dal file precedente
-   (la stringa che inizia con "data:image/jpeg;base64,/9j/...") ---- */
-const REAL_ART = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAcFBQYFBAcGBgYIBwcICxILCwoKCxYPEA0SGhYbGhkWGRgcICgiHB4mHhgZIzAkJiorLS4tGyIyNTEsNSgsLSz/2wBDAQcICAsJCxULCxUsHRkdLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCz/wAARCAK8ApMDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD6RooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiivJ/jZ8WdT+GTaRHpun2l21+JSzXBbC7NvQKR13UAesUV5fb/E3U779n248dx2drBqKQO6w/M0QZZNnTOcd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QAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQB//9k=";
+/* ---- CONTENUTI DINAMICI ----
+   Bio, opere, interviste ed email vengono ora caricati da content/site.json.
+   Per modificarli, usa il pannello di amministrazione su /admin, oppure
+   modifica direttamente content/site.json nel repository. ---- */
+let artworks = [];
+let interviews = [];
 
-/* ---- OPERE: aggiungi / modifica qui ---- */
-const artworks = [
-  {
-    id: "MF-001",
-    title: "Le Frequenze della Vita",
-    series: "Connessioni — Serie 1",
-    img: REAL_ART,
-    placeholder: false,
-    date: "2025",
-    edition: "1 / 1",
-    medium: "Illustrazione digitale vettoriale"
-  },
-  {
-    id: "MF-002",
-    title: "Variazione Ocra",
-    series: "Connessioni — Serie 1",
-    placeholder: "ph1",
-    date: "2025",
-    edition: "1 / 1",
-    medium: "Illustrazione digitale vettoriale"
-  },
-  {
-    id: "MF-003",
-    title: "Notturno Blu",
-    series: "Connessioni — Serie 2",
-    placeholder: "ph2",
-    date: "2025",
-    edition: "1 / 1",
-    medium: "Illustrazione digitale vettoriale"
-  },
-  {
-    id: "MF-004",
-    title: "Verde Selvatico",
-    series: "Connessioni — Serie 2",
-    placeholder: "ph3",
-    date: "2025",
-    edition: "1 / 1",
-    medium: "Illustrazione digitale vettoriale"
+function renderBio(bio) {
+  const el = document.getElementById('bioText');
+  if (!bio || !bio.paragraphs) return;
+  el.innerHTML = bio.paragraphs.map(p => `<p>${p}</p>`).join('');
+}
+
+function renderContact(email) {
+  if (!email) return;
+  const el = document.getElementById('contactLink');
+  el.href = 'mailto:' + email;
+}
+
+async function loadSiteData() {
+  try {
+    const res = await fetch('content/site.json', { cache: 'no-store' });
+    const data = await res.json();
+    renderBio(data.bio);
+    artworks = data.artworks || [];
+    interviews = data.interviews || [];
+    renderContact(data.contactEmail);
+    renderGallery();
+    renderInterviews();
+  } catch (err) {
+    console.error('Impossibile caricare content/site.json', err);
   }
-];
-
-/* ---- INTERVISTE: aggiungi qui le tue interviste ----
-   Esempio di voce da aggiungere:
-   {
-     title: "Titolo dell'intervista",
-     description: "Breve descrizione del contenuto.",
-     date: "Luglio 2026",
-     videoUrl: "https://www.youtube.com/embed/ID_DEL_VIDEO"
-   }
----- */
-const interviews = [
-  // aggiungi le interviste qui
-];
+}
 
 /* ========== GALLERY ========== */
 function badgeSVG() {
@@ -633,7 +603,6 @@ function renderGallery() {
     </div>
   `).join('');
 }
-renderGallery();
 
 /* ========== INTERVISTE ========== */
 function renderInterviews() {
@@ -660,7 +629,8 @@ function renderInterviews() {
     </div>
   `).join('');
 }
-renderInterviews();
+
+loadSiteData();
 
 /* ========== MODALS ========== */
 function openModal(id) { document.getElementById(id).classList.add('open'); }
