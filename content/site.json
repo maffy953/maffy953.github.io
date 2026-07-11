@@ -1,0 +1,55 @@
+json{
+  "bio": {
+    "paragraphs": [
+      "Sono Maurizio Figliomeni, artista digitale che lavora sotto il nome maffy953. La mia ricerca visiva si muove nel territorio dell'astrazione geometrica, dove forme essenziali e palette cromatiche audaci si incontrano per dare voce a temi emotivi profondi.",
+      "Ogni opera della mia serie \"Connessioni\" è un tentativo di tradurre in immagine ciò che le parole faticano a dire: frequenze, variazioni, silenzi e tensioni del vivere contemporaneo.",
+      "Gestisco in autonomia sia la dimensione creativa che quella tecnica del mio lavoro, dalla produzione delle opere fino alla costruzione del mio sito portfolio e alla presenza online. Le mie opere sono disponibili come NFT sulla piattaforma Rarible, con un modello che preserva i miei diritti d'autore e garantisce royalties su ogni rivendita.",
+      "Con una visione ibrida tra arte e tecnologia, sto costruendo una presenza digitale coerente e riconoscibile, rivolta tanto al collezionismo italiano quanto al mercato internazionale."
+    ]
+  },
+  "artworks": [
+    {
+      "id": "MF-001",
+      "title": "Le Frequenze della Vita",
+      "series": "Connessioni — Serie 1",
+      "image": "",
+      "placeholder": "ph1",
+      "date": "2025",
+      "edition": "1 / 1",
+      "medium": "Illustrazione digitale vettoriale"
+    },
+    {
+      "id": "MF-002",
+      "title": "Variazione Ocra",
+      "series": "Connessioni — Serie 1",
+      "image": "",
+      "placeholder": "ph1",
+      "date": "2025",
+      "edition": "1 / 1",
+      "medium": "Illustrazione digitale vettoriale"
+    },
+    {
+      "id": "MF-003",
+      "title": "Notturno Blu",
+      "series": "Connessioni — Serie 2",
+      "image": "",
+      "placeholder": "ph2",
+      "date": "2025",
+      "edition": "1 / 1",
+      "medium": "Illustrazione digitale vettoriale"
+    },
+    {
+      "id": "MF-004",
+      "title": "Verde Selvatico",
+      "series": "Connessioni — Serie 2",
+      "image": "",
+      "placeholder": "ph3",
+      "date": "2025",
+      "edition": "1 / 1",
+      "medium": "Illustrazione digitale vettoriale"
+    }
+  ],
+  "interviews": [],
+  "contactEmail": "INSERISCI-EMAIL"
+}
+
