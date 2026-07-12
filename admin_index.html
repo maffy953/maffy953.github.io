@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amministrazione — maffy953</title>
+<style>
+  :root{
+    --tangerine:#E8722A; --magenta:#C7236B; --berry:#6E1F44;
+    --gold:#F2B632; --cream:#FFF6EC; --ink:#241016; --line:rgba(36,16,22,.14);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--cream);color:var(--ink);font-family:sans-serif;padding:24px;}
+  h1{font-size:1.3rem;margin:0 0 6px;}
+  p.lead{opacity:.75;font-size:.9rem;margin:0 0 24px;max-width:520px;}
+  .box{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px;max-width:560px;margin:0 0 20px;}
+  label{display:block;font-size:.78rem;font-weight:700;margin:14px 0 6px;}
+  label:first-child{margin-top:0;}
+  input[type=text],input[type=password],input[type=email],textarea{
+    width:100%;padding:10px 12px;border-radius:8px;border:1.4px solid var(--line);
+    font-family:inherit;font-size:.9rem;
+  }
+  textarea{min-height:90px;resize:vertical;}
+  .row{display:flex;gap:10px;flex-wrap:wrap;}
+  .row > *{flex:1;min-width:140px;}
+  button{
+    cursor:pointer;border:none;border-radius:999px;padding:11px 20px;
+    font-weight:700;font-size:.85rem;background:var(--ink);color:#fff;margin-top:10px;
+  }
+  button.secondary{background:transparent;color:var(--berry);border:1.4px solid var(--berry);}
+  button.small{padding:6px 12px;font-size:.75rem;margin:6px 0 0;}
+  .item-card{border:1px dashed var(--line);border-radius:10px;padding:14px;margin-bottom:12px;position:relative;}
+  .item-card .del{position:absolute;top:8px;right:8px;background:none;color:var(--berry);
+    border:none;font-size:.75rem;padding:0;margin:0;text-decoration:underline;}
+  .msg{font-size:.85rem;padding:10px 14px;border-radius:8px;margin-top:14px;display:none;}
+  .msg.ok{background:#e5f6e5;color:#1a5c1a;display:block;}
+  .msg.err{background:#fde8e8;color:#8a1c1c;display:block;}
+  .hidden{display:none !important;}
+  .checkbox-row{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:.85rem;}
+  .checkbox-row input{width:auto;}
+  #adminPanel{opacity:.5;pointer-events:none;}
+  #adminPanel.active{opacity:1;pointer-events:auto;}
+</style>
+</head>
+<body>
+
+<h1>Amministrazione sito</h1>
+<p class="lead">Accedi con un token GitHub per modificare bio, email, opere e interviste. Le modifiche vengono pubblicate direttamente sul tuo sito.</p>
+
+<div class="box">
+  <label>Personal Access Token GitHub</label>
+  <input type="password" id="tokenInput" placeholder="ghp_...">
+  <div class="checkbox-row">
+    <input type="checkbox" id="rememberToken">
+    <label style="margin:0;font-weight:400;">Ricorda su questo dispositivo</label>
+  </div>
+  <button onclick="connect()">Connetti</button>
+  <div id="connectMsg" class="msg"></div>
+</div>
+
+<div id="adminPanel">
+  <div class="box">
+    <label>Bio (ogni paragrafo separato da una riga vuota)</label>
+    <textarea id="bioText" style="min-height:180px;"></textarea>
+
+    <label>Email di contatto</label>
+    <input type="email" id="emailInput">
+  </div>
+
+  <div class="box">
+    <label style="margin-bottom:12px;">Opere</label>
+    <div id="artworksList"></div>
+    <button class="secondary small" onclick="addArtwork()">+ Aggiungi opera</button>
+  </div>
+
+  <div class="box">
+    <label style="margin-bottom:12px;">Interviste</label>
+    <div id="interviewsList"></div>
+    <button class="secondary small" onclick="addInterview()">+ Aggiungi intervista</button>
+  </div>
+
+  <button onclick="save()">Salva e pubblica</button>
+  <div id="saveMsg" class="msg"></div>
+</div>
+
+<script>
+const OWNER = "maffy953";
+const REPO = "maffy953.github.io";
+const FILE = "index.html";
+const BRANCH = "main";
+
+let token = "";
+let fileSha = "";
+let originalContent = "";
+let artworks = [];
+let interviews = [];
+
+if (localStorage.getItem("gh_pat")) {
+  document.getElementById("tokenInput").value = localStorage.getItem("gh_pat");
+  document.getElementById("rememberToken").checked = true;
+}
+
+function b64DecodeUnicode(str) {
+  return decodeURIComponent(atob(str).split('').map(c =>
+    '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+}
+function b64EncodeUnicode(str) {
+  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
+    (m, p1) => String.fromCharCode('0x' + p1)));
+}
+
+async function connect() {
+  token = document.getElementById("tokenInput").value.trim();
+  const msg = document.getElementById("connectMsg");
+  if (!token) { msg.className = "msg err"; msg.textContent = "Inserisci un token."; return; }
+
+  if (document.getElementById("rememberToken").checked) {
+    localStorage.setItem("gh_pat", token);
+  } else {
+    localStorage.removeItem("gh_pat");
+  }
+
+  try {
+    const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}?ref=${BRANCH}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!res.ok) {
+      const t = await res.text();
+      throw new Error(`GitHub ha risposto ${res.status}: ${t.slice(0,200)}`);
+    }
+    const data = await res.json();
+    fileSha = data.sha;
+    originalContent = b64DecodeUnicode(data.content);
+
+    loadFields(originalContent);
+
+    msg.className = "msg ok";
+    msg.textContent = "Connesso! Modifica i campi qui sotto.";
+    document.getElementById("adminPanel").classList.add("active");
+  } catch (e) {
+    msg.className = "msg err";
+    msg.textContent = "Errore: " + e.message;
+  }
+}
+
+function loadFields(html) {
+  const bioMatch = html.match(/<div class="bio-text">([\s\S]*?)<\/div>/);
+  if (bioMatch) {
+    const paras = [...bioMatch[1].matchAll(/<p>([\s\S]*?)<\/p>/g)].map(m => m[1].trim());
+    document.getElementById("bioText").value = paras.join("\n\n");
+  }
+
+  const emailMatch = html.match(/mailto:([^"]*)"/);
+  document.getElementById("emailInput").value = emailMatch ? emailMatch[1] : "";
+
+  const artMatch = html.match(/const artworks = (\[[\s\S]*?\n\]);/);
+  artworks = artMatch ? Function('"use strict";return (' + artMatch[1] + ')')() : [];
+  renderArtworks();
+
+  const ivMatch = html.match(/const interviews = (\[[\s\S]*?\n\]);/);
+  interviews = ivMatch ? Function('"use strict";return (' + ivMatch[1] + ')')() : [];
+  renderInterviews();
+}
+
+function renderArtworks() {
+  const el = document.getElementById("artworksList");
+  el.innerHTML = artworks.map((a, i) => `
+    <div class="item-card">
+      <button class="del" onclick="artworks.splice(${i},1);renderArtworks()">Rimuovi</button>
+      <div class="row">
+        <div><label>Titolo</label><input type="text" value="${a.title||''}" onchange="artworks[${i}].title=this.value"></div>
+        <div><label>Serie</label><input type="text" value="${a.series||''}" onchange="artworks[${i}].series=this.value"></div>
+      </div>
+      <div class="row">
+        <div><label>Anno</label><input type="text" value="${a.date||''}" onchange="artworks[${i}].date=this.value"></div>
+        <div><label>Edizione</label><input type="text" value="${a.edition||''}" onchange="artworks[${i}].edition=this.value"></div>
+        <div><label>Tecnica</label><input type="text" value="${a.medium||''}" onchange="artworks[${i}].medium=this.value"></div>
+      </div>
+    </div>
+  `).join('') || '<p style="opacity:.6;font-size:.85rem;">Nessuna opera.</p>';
+}
+
+function addArtwork() {
+  const n = artworks.length + 1;
+  artworks.push({
+    id: "MF-" + String(n).padStart(3,"0"),
+    title: "Nuova opera",
+    series: "Connessioni",
+    placeholder: ["ph1","ph2","ph3"][n % 3],
+    date: new Date().getFullYear().toString(),
+    edition: "1 / 1",
+    medium: "Illustrazione digitale vettoriale"
+  });
+  renderArtworks();
+}
+
+function renderInterviews() {
+  const el = document.getElementById("interviewsList");
+  el.innerHTML = interviews.map((iv, i) => `
+    <div class="item-card">
+      <button class="del" onclick="interviews.splice(${i},1);renderInterviews()">Rimuovi</button>
+      <label>Titolo</label><input type="text" value="${iv.title||''}" onchange="interviews[${i}].title=this.value">
+      <label>Descrizione</label><textarea onchange="interviews[${i}].description=this.value">${iv.description||''}</textarea>
+      <div class="row">
+        <div><label>Data</label><input type="text" value="${iv.date||''}" onchange="interviews[${i}].date=this.value"></div>
+        <div><label>URL video (embed YouTube)</label><input type="text" value="${iv.videoUrl||''}" onchange="interviews[${i}].videoUrl=this.value"></div>
+      </div>
+    </div>
+  `).join('') || '<p style="opacity:.6;font-size:.85rem;">Nessuna intervista.</p>';
+}
+
+function addInterview() {
+  interviews.push({ title:"Nuova intervista", description:"", date:"", videoUrl:"" });
+  renderInterviews();
+}
+
+function jsArrayLiteral(arr) {
+  return JSON.stringify(arr, null, 2).replace(/"REAL_ART"/g, "REAL_ART");
+}
+
+async function save() {
+  const msg = document.getElementById("saveMsg");
+  try {
+    let html = originalContent;
+
+    const paras = document.getElementById("bioText").value
+      .split(/\n\s*\n/).map(p => p.trim()).filter(Boolean);
+    const newBio = `<div class="bio-text">\n` + paras.map(p => `<p>${p}</p>`).join('\n') + `\n</div>`;
+    html = html.replace(/<div class="bio-text">[\s\S]*?<\/div>/, newBio);
+
+    const email = document.getElementById("emailInput").value.trim();
+    html = html.replace(/mailto:[^"]*"/, `mailto:${email}"`);
+
+    // preserve REAL_ART reference for entries that used it
+    const artworksForSave = artworks.map(a => {
+      const copy = {...a};
+      if (a.img === undefined && a.placeholder === false) copy.img = "__REAL_ART__";
+      return copy;
+    });
+    let artStr = JSON.stringify(artworksForSave, null, 2);
+    artStr = artStr.replace(/"img": "__REAL_ART__"/g, 'img: REAL_ART');
+    html = html.replace(/const artworks = \[[\s\S]*?\n\];/, `const artworks = ${artStr};`);
+
+    const ivStr = JSON.stringify(interviews, null, 2);
+    html = html.replace(/const interviews = \[[\s\S]*?\n\];/, `const interviews = ${ivStr};`);
+
+    const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        message: "Aggiornamento contenuti dal pannello admin",
+        content: b64EncodeUnicode(html),
+        sha: fileSha,
+        branch: BRANCH
+      })
+    });
+
+    if (!res.ok) {
+      const t = await res.text();
+      throw new Error(`GitHub ha risposto ${res.status}: ${t.slice(0,200)}`);
+    }
+
+    const data = await res.json();
+    fileSha = data.content.sha;
+    originalContent = html;
+
+    msg.className = "msg ok";
+    msg.textContent = "Pubblicato! Il sito si aggiornerà in circa un minuto.";
+  } catch (e) {
+    msg.className = "msg err";
+    msg.textContent = "Errore nel salvataggio: " + e.message;
+  }
+}
+</script>
+</body>
+</html>
